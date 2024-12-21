@@ -1,7 +1,15 @@
+using Microsoft.EntityFrameworkCore;
+using PackageTracker.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Configure database context
+builder.Services.AddDbContext<PackageTrackerContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 var app = builder.Build();
 
