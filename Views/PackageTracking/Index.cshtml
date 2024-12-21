@@ -1,0 +1,12 @@
+﻿@model string
+
+<h1>Track Your Package</h1>
+<form asp-controller="PackageTracking" asp-action="Track" method="post">
+    <label for="trackingNumber">Tracking Number:</label>
+    <input type="text" id="trackingNumber" name="trackingNumber" required />
+    <button type="submit">Track</button>
+</form>
+@if (!string.IsNullOrEmpty(Model))
+{
+    <p class="text-danger">@Model</p>
+}
