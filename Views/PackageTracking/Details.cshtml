@@ -1,15 +1,20 @@
 ﻿@model PackageTracker.Models.PackageTracking
 
-@{
-    ViewData["Title"] = "Package Details";
-}
-
 <h1>Package Details</h1>
 
-<p><strong>Tracking Number:</strong> @Model.TrackingNumber</p>
+<p><strong>Tracking Number:</strong> @Model.Id</p>
 <p><strong>Carrier:</strong> @Model.Carrier</p>
 <p><strong>Status:</strong> @Model.Status</p>
 <p><strong>Origin:</strong> @Model.Origin</p>
 <p><strong>Destination:</strong> @Model.Destination</p>
 <p><strong>Shipping Date:</strong> @Model.ShippingDate.ToShortDateString()</p>
 <p><strong>Delivery Date:</strong> @Model.DeliveryDate.ToShortDateString()</p>
+
+@if (ViewBag.AverageShippingTime != null)
+{
+    <p><strong>Average Shipping Time:</strong> @ViewBag.AverageShippingTime days</p>
+}
+else
+{
+    <p><strong>Average Shipping Time:</strong> No data available</p>
+}

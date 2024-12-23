@@ -37,6 +37,12 @@ namespace PackageTracker.Controllers
                 return View("Index");
             }
 
+            // Calculate the average shipping time
+            var averageShippingTime = _packageTrackingService
+                .GetAverageShippingTime(packageDetails.Origin, packageDetails.Destination);
+
+            ViewBag.AverageShippingTime = averageShippingTime;
+
             return View("Details", packageDetails);
         }
     }

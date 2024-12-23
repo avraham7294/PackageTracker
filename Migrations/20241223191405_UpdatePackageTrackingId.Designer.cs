@@ -12,8 +12,8 @@ using PackageTracker.Data;
 namespace PackageTracker.Migrations
 {
     [DbContext(typeof(PackageTrackerContext))]
-    [Migration("20241221140451_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20241223191405_UpdatePackageTrackingId")]
+    partial class UpdatePackageTrackingId
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,11 +27,8 @@ namespace PackageTracker.Migrations
 
             modelBuilder.Entity("PackageTracker.Models.PackageTracking", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Carrier")
                         .IsRequired()
@@ -55,13 +52,9 @@ namespace PackageTracker.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TrackingNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
 
-                    b.ToTable("Packages");
+                    b.ToTable("PackageTrackings");
                 });
 #pragma warning restore 612, 618
         }
