@@ -1,10 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using PackageTracker.Data;
+using PackageTracker.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Adding the MockAPI services. **
+builder.Services.AddHttpClient("MockPackageTrackingApi", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7289/api/PackageTracking/");
+});
+
+builder.Services.AddTransient<PackageTrackingService>();
 
 // Configure database context
 builder.Services.AddDbContext<PackageTrackerContext>(options =>

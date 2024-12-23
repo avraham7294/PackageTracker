@@ -1,12 +1,16 @@
-﻿@model string
+﻿@{
+    ViewData["Title"] = "Package Tracker";
+}
 
-<h1>Track Your Package</h1>
-<form asp-controller="PackageTracking" asp-action="Track" method="post">
-    <label for="trackingNumber">Tracking Number:</label>
-    <input type="text" id="trackingNumber" name="trackingNumber" required />
+<h1>Package Tracker</h1>
+
+<form method="post" asp-action="TrackPackage" asp-controller="PackageTracking">
+    <label for="trackingNumber">Enter Tracking Number:</label>
+    <input type="text" id="trackingNumber" name="trackingNumber" />
     <button type="submit">Track</button>
 </form>
-@if (!string.IsNullOrEmpty(Model))
+
+@if (ViewBag.ErrorMessage != null)
 {
-    <p class="text-danger">@Model</p>
+    <p style="color: red">@ViewBag.ErrorMessage</p>
 }

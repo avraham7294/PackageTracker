@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace PackageTracker.Models
+namespace PackageTracker.Models 
 {
     public class PackageTracking
     {
-        public int Id { get; set; } // Database primary key
         public string TrackingNumber { get; set; }
         public string Carrier { get; set; }
         public string Status { get; set; }

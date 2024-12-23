@@ -1,13 +1,15 @@
 ﻿@model PackageTracker.Models.PackageTracking
 
+@{
+    ViewData["Title"] = "Package Details";
+}
+
 <h1>Package Details</h1>
-<ul>
-    <li><strong>Tracking Number:</strong> @Model.TrackingNumber</li>
-    <li><strong>Carrier:</strong> @Model.Carrier</li>
-    <li><strong>Status:</strong> @Model.Status</li>
-    <li><strong>Shipping Date:</strong> @Model.ShippingDate.ToShortDateString()</li>
-    <li><strong>Estimated Delivery Date:</strong> @Model.DeliveryDate.ToShortDateString()</li>
-    <li><strong>Origin:</strong> @Model.Origin</li>
-    <li><strong>Destination:</strong> @Model.Destination</li>
-</ul>
-<a href="/PackageTracking/Index">Track Another Package</a>
+
+<p><strong>Tracking Number:</strong> @Model.TrackingNumber</p>
+<p><strong>Carrier:</strong> @Model.Carrier</p>
+<p><strong>Status:</strong> @Model.Status</p>
+<p><strong>Origin:</strong> @Model.Origin</p>
+<p><strong>Destination:</strong> @Model.Destination</p>
+<p><strong>Shipping Date:</strong> @Model.ShippingDate.ToShortDateString()</p>
+<p><strong>Delivery Date:</strong> @Model.DeliveryDate.ToShortDateString()</p>

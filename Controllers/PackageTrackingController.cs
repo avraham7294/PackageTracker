@@ -1,53 +1,43 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PackageTracker.Data;
 using PackageTracker.Models;
+using PackageTracker.Services;
 using System.Threading.Tasks;
 
 namespace PackageTracker.Controllers
 {
     public class PackageTrackingController : Controller
     {
-        private readonly PackageTrackerContext _context;
-        public PackageTrackingController(PackageTrackerContext context)
+        private readonly PackageTrackingService _packageTrackingService;
+
+        public PackageTrackingController(PackageTrackingService packageTrackingService)
         {
-            _context = context;
+            _packageTrackingService = packageTrackingService;
         }
 
-        // GET: /PackageTracking/Index
+        [HttpGet]
         public IActionResult Index()
         {
             return View();
         }
 
-        // POST: /PackageTracking/Track
         [HttpPost]
-        public async Task<IActionResult> Track(string trackingNumber)
+        public async Task<IActionResult> TrackPackage(string trackingNumber)
         {
             if (string.IsNullOrEmpty(trackingNumber))
             {
-                ModelState.AddModelError(string.Empty, "Please enter a tracking number.");
+                ViewBag.ErrorMessage = "Please provide a tracking number.";
                 return View("Index");
             }
 
-            // Mock data until API is integrated
-            var mockPackage = new PackageTracking
+            var packageDetails = await _packageTrackingService.GetPackageDetailsAsync(trackingNumber);
+
+            if (packageDetails == null)
             {
-                TrackingNumber = trackingNumber,
-                Carrier = "MockCarrier",
-                Status = "In Transit",
-                ShippingDate = System.DateTime.Now.AddDays(-3),
-                DeliveryDate = System.DateTime.Now.AddDays(2),
-                Origin = "New York, NY",
-                Destination = "San Francisco, CA"
-            };
+                ViewBag.ErrorMessage = "Tracking number not found.";
+                return View("Index");
+            }
 
-            // Optionally, save this package in the database (mock for now)
-            await _context.Packages.AddAsync(mockPackage);
-            await _context.SaveChangesAsync();
-
-            return View("Details", mockPackage);
+            return View("Details", packageDetails);
         }
-
-
     }
 }
