@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PackageTracker.Data;
 using PackageTracker.Models;
 using PackageTracker.Services;
 using System.Threading.Tasks;
@@ -7,11 +8,13 @@ namespace PackageTracker.Controllers
 {
     public class PackageTrackingController : Controller
     {
+        private readonly PackageTrackerContext _dbContext;
         private readonly PackageTrackingService _packageTrackingService;
 
-        public PackageTrackingController(PackageTrackingService packageTrackingService)
+        public PackageTrackingController(PackageTrackingService packageTrackingService, PackageTrackerContext dbContext)
         {
             _packageTrackingService = packageTrackingService;
+            _dbContext = dbContext;
         }
 
         [HttpGet]
@@ -37,9 +40,8 @@ namespace PackageTracker.Controllers
                 return View("Index");
             }
 
-            // Calculate the average shipping time
-            var averageShippingTime = _packageTrackingService
-                .GetAverageShippingTime(packageDetails.Origin, packageDetails.Destination);
+            // Calculate the average shipping time, call directly to the context
+            var averageShippingTime = _dbContext.GetAverageShippingTime(packageDetails.Origin, packageDetails.Destination);
 
             ViewBag.AverageShippingTime = averageShippingTime;
 

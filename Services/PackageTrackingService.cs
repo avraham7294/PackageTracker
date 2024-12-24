@@ -53,20 +53,5 @@ namespace PackageTracker.Services
                 return null; // Handle network errors
             }
         }
-
-        public double? GetAverageShippingTime(string origin, string destination) // ***Thinking to move this to the PackageTrackerConetext
-        {
-            var relevantPackages = _dbContext.PackageTrackings
-                .Where(p => p.Origin == origin && p.Destination == destination)
-                .ToList();
-
-            if (!relevantPackages.Any()) return null;
-
-            var totalDays = relevantPackages
-                .Where(p => p.DeliveryDate > p.ShippingDate)
-                .Sum(p => (p.DeliveryDate - p.ShippingDate).TotalDays);
-
-            return totalDays / relevantPackages.Count;
-        }
     }
 }

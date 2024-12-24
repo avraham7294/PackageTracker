@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PackageTracker.Models;
+using System;
+using System.Linq;
 
 namespace PackageTracker.Data
 {
@@ -9,10 +11,19 @@ namespace PackageTracker.Data
 
         public DbSet<PackageTracking> PackageTrackings { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        public double? GetAverageShippingTime(string origin, string destination) 
         {
-            modelBuilder.Entity<PackageTracking>()
-                .HasKey(p => p.Id); // Ensures Id is the primary key
+            var relevantPackages = PackageTrackings
+                .Where(p => p.Origin == origin && p.Destination == destination)
+                .ToList();
+
+            if (!relevantPackages.Any()) return null;
+
+            var totalDays = relevantPackages
+                .Where(p => p.DeliveryDate > p.ShippingDate)
+                .Sum(p => (p.DeliveryDate - p.ShippingDate).TotalDays);
+
+            return totalDays / relevantPackages.Count;
         }
 
     }

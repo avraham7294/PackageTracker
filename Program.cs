@@ -7,40 +7,43 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Adding the MockAPI services. **
+
+// Configure the database context
+builder.Services.AddDbContext<PackageTrackerContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Configure HTTP Client for Mock API
 builder.Services.AddHttpClient("MockPackageTrackingApi", client =>
 {
     client.BaseAddress = new Uri("https://localhost:7289/api/PackageTracking/");
 });
 
+// Register services
 builder.Services.AddTransient<PackageTrackingService>();
-
-// Configure database context
-builder.Services.AddDbContext<PackageTrackerContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    app.UseDeveloperExceptionPage(); // Use detailed exception page in development
+}
+else
+{
+    app.UseExceptionHandler("/Home/Error"); // Use custom error page in production
+    app.UseHsts(); // Add HSTS headers for security
 }
 
-app.UseHttpsRedirection();
+app.UseHttpsRedirection(); // Enforce HTTPS
+app.UseStaticFiles(); // Serve static files like CSS, JS, and images
+
 app.UseRouting();
 
-app.UseAuthorization();
+app.UseAuthorization(); // Apply authorization middleware
 
-app.MapStaticAssets();
-
+// Define default route mapping
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
-
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
