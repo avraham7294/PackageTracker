@@ -12,6 +12,7 @@ namespace PackageTracker.Controllers
         private readonly PackageTrackerContext _dbContext;
         private readonly PackageTrackingService _packageTrackingService;
 
+        // Constructor to initialize services and database context
         public PackageTrackingController(PackageTrackingService packageTrackingService, PackageTrackerContext dbContext)
         {
             _packageTrackingService = packageTrackingService;
@@ -19,12 +20,14 @@ namespace PackageTracker.Controllers
         }
 
         [HttpGet]
+        // Handles GET request to render the Index view
         public IActionResult Index()
         {
             return View();
         }
 
         [HttpPost]
+        // Handles POST request to track a package by its tracking number
         public async Task<IActionResult> TrackPackage(string trackingNumber)
         {
             // Validate tracking number format
@@ -35,7 +38,7 @@ namespace PackageTracker.Controllers
                 return View("Index");
             }
 
-            // Fetch package from the external API > Check if the package exists in our database > Add or update the package in our database
+            // Fetch package details using the service, Add or update.
             var packageDetails = await _packageTrackingService.GetPackageDetailsAsync(trackingNumber); 
             if (packageDetails == null)
             {
@@ -43,19 +46,20 @@ namespace PackageTracker.Controllers
                 return View("Index");
             }
 
-            // Await the average shipping time task
+            // Calculate average shipping time and similar shipments count
             var (averageShippingTime, shipmentCount) = await _packageTrackingService.GetAverageShippingTimeAsync(packageDetails.Origin, packageDetails.Destination);
 
+            // If average shipping time and count are available, calculate estimated arrival details
             if (averageShippingTime.HasValue)
             {
-                var daysPassed = (DateTime.Now - packageDetails.ShippingDate).TotalDays;
-                var estimatedArrival = averageShippingTime.Value - daysPassed;
+                var estimatedArrivalDate = packageDetails.ShippingDate.AddDays(averageShippingTime.Value);
 
                 ViewBag.AverageShippingTime = averageShippingTime.Value.ToString("0.##");
                 ViewBag.ShipmentCount = shipmentCount;
-                ViewBag.DaysPassed = daysPassed.ToString("0");
-                ViewBag.EstimatedArrival = estimatedArrival > 0
-                    ? $"approximately {Math.Ceiling(estimatedArrival)} days"
+                ViewBag.DaysPassed = (DateTime.Now - packageDetails.ShippingDate).TotalDays.ToString("0");
+                ViewBag.EstimatedArrivalDate = estimatedArrivalDate;
+                ViewBag.EstimatedArrival = estimatedArrivalDate > DateTime.Now
+                    ? estimatedArrivalDate.ToString("MMMM dd, yyyy")
                     : "it should have already arrived.";
             }
             else

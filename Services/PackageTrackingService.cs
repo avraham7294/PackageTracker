@@ -15,6 +15,7 @@ namespace PackageTracker.Services
         private readonly PackageTrackerContext _dbContext;
         private readonly ILogger<PackageTrackingService> _logger;
 
+        // Constructor to initialize HTTP client, database context, and logger
         public PackageTrackingService(IHttpClientFactory httpClientFactory,
                                        PackageTrackerContext dbContext,
                                        ILogger<PackageTrackingService> logger)
@@ -24,6 +25,7 @@ namespace PackageTracker.Services
             _logger = logger;
         }
 
+        // Fetches package details and updates the database
         public async Task<PackageTracking?> GetPackageDetailsAsync(string trackingNumber)
         {
             try
@@ -48,7 +50,8 @@ namespace PackageTracker.Services
         }
 
 
-        private async Task<PackageTracking?> FetchPackageFromApiAsync(string trackingNumber)  // Fetch Package Details from the API
+        // Fetches package details from the external API
+        private async Task<PackageTracking?> FetchPackageFromApiAsync(string trackingNumber)
         {
             try
             {
@@ -59,14 +62,16 @@ namespace PackageTracker.Services
                 _logger.LogError(ex, "Error occurred while fetching package details for {TrackingNumber} from the API", trackingNumber);
                 return null;
             }
-        } 
+        }
 
+        // Retrieves a package from the database based on tracking number
         private async Task<PackageTracking?> GetPackageFromDatabaseAsync(string trackingNumber)  // Check If Package Exists in Database
         {
             return await _dbContext.PackageTrackings
                 .FirstOrDefaultAsync(p => p.Id == trackingNumber);
         }
 
+        // Adds a new package or updates an existing one in the database
         private async Task AddOrUpdatePackageInDatabaseAsync(PackageTracking package, PackageTracking? existingPackage) // Add or Update Package in the Database
         {
             if (existingPackage == null)
@@ -88,9 +93,10 @@ namespace PackageTracker.Services
             await _dbContext.SaveChangesAsync();
         }
 
+        // Calculates average shipping time and shipment count for similar origin and destination
         public async Task<(double? AverageDays, int Count)> GetAverageShippingTimeAsync(string origin, string destination)
         {
-            var cutoffDate = DateTime.Now.AddDays(-60); // 60 days ago
+            var cutoffDate = DateTime.Now.AddDays(-60); // Limit to shipments in the last 60 days
 
             var relevantPackages = await _dbContext.PackageTrackings
                 .Where(p => p.Origin == origin && p.Destination == destination
@@ -102,8 +108,8 @@ namespace PackageTracker.Services
 
             var totalDays = relevantPackages
                 .Sum(p => (p.DeliveryDate - p.ShippingDate).TotalDays);
-
             var averageDays = totalDays / relevantPackages.Count;
+
             return (averageDays, relevantPackages.Count);
         }
     }
