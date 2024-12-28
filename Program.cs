@@ -18,8 +18,8 @@ builder.Services.AddHttpClient("MockPackageTrackingApi", client =>
     client.BaseAddress = new Uri("https://localhost:7289/api/PackageTracking/");
 });
 
-// Register services
-builder.Services.AddTransient<PackageTrackingService>();
+// Register services as Scoped
+builder.Services.AddScoped<PackageTrackingService>();
 
 var app = builder.Build();
 
