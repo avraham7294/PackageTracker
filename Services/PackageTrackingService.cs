@@ -107,7 +107,7 @@ namespace PackageTracker.Services
             if (!relevantPackages.Any()) return (null, 0);
 
             var totalDays = relevantPackages
-                .Sum(p => (p.DeliveryDate - p.ShippingDate).TotalDays);
+                .Sum(p => (p.DeliveryDate.HasValue ? (p.DeliveryDate.Value - p.ShippingDate).TotalDays : 0)); //  Check for DeliveryDate being non-null before performing calculations.
             var averageDays = totalDays / relevantPackages.Count;
 
             return (averageDays, relevantPackages.Count);

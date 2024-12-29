@@ -8,7 +8,11 @@
 <p><strong>Origin:</strong> @Model.Origin</p>
 <p><strong>Destination:</strong> @Model.Destination</p>
 <p><strong>Shipping Date:</strong> @Model.ShippingDate.ToShortDateString()</p>
-<p><strong>Delivery Date:</strong> @Model.DeliveryDate.ToShortDateString()</p>
+
+@if (Model.DeliveryDate.HasValue)
+{
+    <p><strong>Delivery Date:</strong> @Model.DeliveryDate.Value.ToShortDateString()</p>
+}
 
 <br />
 
@@ -16,8 +20,12 @@
 {
     <p><strong>Based on:</strong> @ViewBag.ShipmentCount similar shipments in the last 60 days</p>
     <p><strong>Average Shipping Time:</strong> @ViewBag.AverageShippingTime days</p>
-    <p><strong>Days Passed Since Shipping:</strong> @ViewBag.DaysPassed days</p>
-    <p><strong>Estimated Delivery Date:</strong> @ViewBag.EstimatedArrival</p>
+
+    @if (Model.Status != "Completed")
+    {
+        <p><strong>Days Passed Since Shipping:</strong> @ViewBag.DaysPassed days</p>
+        <p><strong>Estimated Delivery Date:</strong> @ViewBag.EstimatedArrival</p>
+    }
 }
 else
 {
