@@ -25,6 +25,11 @@
     {
         <p><strong>Days Passed Since Shipping:</strong> @ViewBag.DaysPassed days</p>
         <p><strong>Estimated Delivery Date:</strong> @ViewBag.EstimatedArrival</p>
+
+        @if (ViewBag.WeatherWarning != null)
+        {
+            <p><strong>Weather Warning:</strong> @ViewBag.WeatherWarning</p>
+        }
     }
 }
 else

@@ -18,6 +18,13 @@ builder.Services.AddHttpClient("MockPackageTrackingApi", client =>
     client.BaseAddress = new Uri("https://localhost:7289/api/PackageTracking/");
 });
 
+// Base URL for the Weather API
+builder.Services.AddHttpClient("WeatherApi", client =>
+{
+    client.BaseAddress = new Uri("http://api.weatherapi.com/v1/");
+});
+
+
 // Register services as Scoped
 builder.Services.AddScoped<PackageTrackingService>();
 

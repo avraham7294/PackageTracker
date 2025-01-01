@@ -112,5 +112,30 @@ namespace PackageTracker.Services
 
             return (averageDays, relevantPackages.Count);
         }
+
+
+        // Fetch weather data real API
+        public async Task<string?> CheckWeatherAsync(string destination)
+        {
+            try
+            {
+                var apiKey = "6d4213dc4fa04aea949150239250101";
+                var response = await _httpClient.GetFromJsonAsync<WeatherResponse>($"http://api.weatherapi.com/v1/current.json?key={apiKey}&q={destination}");
+                if (response?.Current?.TempC != null)
+                {
+                    var temp = response.Current.TempC;
+                    if (temp < 10 || temp > 20) // Define extreme weather conditions
+                    {
+                        return "Due to extreme weather in the area, additional delays may occur.";
+                    }
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching weather data for {Destination}", destination);
+            }
+            return null;
+        }
+
     }
 }

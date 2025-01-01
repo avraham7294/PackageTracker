@@ -46,6 +46,13 @@ namespace PackageTracker.Controllers
                 return View("Index");
             }
 
+            // Fetch weather details
+            var weatherWarning = await _packageTrackingService.CheckWeatherAsync(packageDetails.Destination);
+            if (weatherWarning != null)
+            {
+                ViewBag.WeatherWarning = weatherWarning;
+            }
+
             // Calculate average shipping time and similar shipments count
             var (averageShippingTime, shipmentCount) = await _packageTrackingService.GetAverageShippingTimeAsync(packageDetails.Origin, packageDetails.Destination);
 
