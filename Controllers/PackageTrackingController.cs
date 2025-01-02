@@ -54,7 +54,10 @@ namespace PackageTracker.Controllers
             }
 
             // Calculate average shipping time and similar shipments count
-            var (averageShippingTime, shipmentCount) = await _packageTrackingService.GetAverageShippingTimeAsync(packageDetails.Origin, packageDetails.Destination);
+            var (averageShippingTime, shipmentCount) = await _packageTrackingService.GetAverageShippingTimeAsync(
+            packageDetails.Origin,
+            packageDetails.Destination,
+            packageDetails.Carrier);
 
             // If average shipping time and count are available, calculate estimated arrival details
             if (averageShippingTime.HasValue)

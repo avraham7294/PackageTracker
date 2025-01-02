@@ -82,24 +82,25 @@ namespace PackageTracker.Services
             else
             {
                 // Update existing package details
-                existingPackage.Carrier = package.Carrier;
+                //existingPackage.Carrier = package.Carrier;
                 existingPackage.Status = package.Status;
-                existingPackage.ShippingDate = package.ShippingDate;
+                //existingPackage.ShippingDate = package.ShippingDate;
                 existingPackage.DeliveryDate = package.DeliveryDate;
-                existingPackage.Origin = package.Origin;
-                existingPackage.Destination = package.Destination;
+                //existingPackage.Origin = package.Origin;
+                //existingPackage.Destination = package.Destination;
             }
 
             await _dbContext.SaveChangesAsync();
         }
 
         // Calculates average shipping time and shipment count for similar origin and destination
-        public async Task<(double? AverageDays, int Count)> GetAverageShippingTimeAsync(string origin, string destination)
+        public async Task<(double? AverageDays, int Count)> GetAverageShippingTimeAsync(string origin, string destination, string carrier)
         {
             var cutoffDate = DateTime.Now.AddDays(-60); // Limit to shipments in the last 60 days
 
             var relevantPackages = await _dbContext.PackageTrackings
                 .Where(p => p.Origin == origin && p.Destination == destination
+                            && p.Carrier == carrier
                             && p.Status == "Completed"
                             && p.ShippingDate >= cutoffDate)
                 .ToListAsync();
@@ -108,10 +109,12 @@ namespace PackageTracker.Services
 
             var totalDays = relevantPackages
                 .Sum(p => (p.DeliveryDate.HasValue ? (p.DeliveryDate.Value - p.ShippingDate).TotalDays : 0)); //  Check for DeliveryDate being non-null before performing calculations.
+
             var averageDays = totalDays / relevantPackages.Count;
 
             return (averageDays, relevantPackages.Count);
         }
+
 
 
         // Fetch weather data real API
