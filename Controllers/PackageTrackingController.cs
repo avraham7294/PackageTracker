@@ -38,7 +38,7 @@ namespace PackageTracker.Controllers
                 return View("Index");
             }
 
-            // Fetch package details using the service, Add or update.
+            // Fetch package details from external API using the service, Adding/Updating our database.
             var packageDetails = await _packageTrackingService.GetPackageDetailsAsync(trackingNumber); 
             if (packageDetails == null)
             {

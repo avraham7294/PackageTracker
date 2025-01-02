@@ -25,19 +25,19 @@ namespace PackageTracker.Services
             _logger = logger;
         }
 
-        // Fetches package details and updates the database
+        // Fetches package details from external API, Add/Update our database
         public async Task<PackageTracking?> GetPackageDetailsAsync(string trackingNumber)
         {
             try
             {
-                // Step 1: Fetch package from the API
+                // Step 1: Fetch package from external API
                 var package = await FetchPackageFromApiAsync(trackingNumber);
                 if (package == null) return null;
 
-                // Step 2: Check if the package exists in the database
+                // Step 2: Check if the package exists in our database
                 var existingPackage = await GetPackageFromDatabaseAsync(trackingNumber);
 
-                // Step 3: Add or update the package in the database
+                // Step 3: Add or update the package in our database
                 await AddOrUpdatePackageInDatabaseAsync(package, existingPackage);
 
                 return package;
@@ -64,14 +64,14 @@ namespace PackageTracker.Services
             }
         }
 
-        // Retrieves a package from the database based on tracking number
-        private async Task<PackageTracking?> GetPackageFromDatabaseAsync(string trackingNumber)  // Check If Package Exists in Database
+        // Retrieves a package from our database based on tracking number
+        private async Task<PackageTracking?> GetPackageFromDatabaseAsync(string trackingNumber)  // Check If Package Exists in our Database
         {
             return await _dbContext.PackageTrackings
                 .FirstOrDefaultAsync(p => p.Id == trackingNumber);
         }
 
-        // Adds a new package or updates an existing one in the database
+        // Adds a new package or updates an existing one in our database
         private async Task AddOrUpdatePackageInDatabaseAsync(PackageTracking package, PackageTracking? existingPackage) // Add or Update Package in the Database
         {
             if (existingPackage == null)
@@ -81,41 +81,89 @@ namespace PackageTracker.Services
             }
             else
             {
-                // Update existing package details
-                //existingPackage.Carrier = package.Carrier;
                 existingPackage.Status = package.Status;
-                //existingPackage.ShippingDate = package.ShippingDate;
                 existingPackage.DeliveryDate = package.DeliveryDate;
-                //existingPackage.Origin = package.Origin;
-                //existingPackage.Destination = package.Destination;
             }
 
             await _dbContext.SaveChangesAsync();
         }
 
-        // Calculates average shipping time and shipment count for similar origin and destination
-        public async Task<(double? AverageDays, int Count)> GetAverageShippingTimeAsync(string origin, string destination, string carrier)
+        // Method to Fetch Shipping Statistics
+        public async Task<ShippingStatistics?> GetShippingStatisticsAsync(string origin, string destination, string carrier)
+        {
+            return await _dbContext.ShippingStatistics
+                .FirstOrDefaultAsync(stat => stat.Origin == origin && 
+                                             stat.Destination == destination && 
+                                             stat.Carrier == carrier);
+        }
+
+        // Calculates average shipping time and count for similar shipments
+        // And updating the cached ShippingStatistics table
+        public async Task UpdateShippingStatisticsAsync(string origin, string destination, string carrier)
         {
             var cutoffDate = DateTime.Now.AddDays(-60); // Limit to shipments in the last 60 days
 
             var relevantPackages = await _dbContext.PackageTrackings
-                .Where(p => p.Origin == origin && p.Destination == destination
-                            && p.Carrier == carrier
-                            && p.Status == "Completed"
-                            && p.ShippingDate >= cutoffDate)
+                .Where(p => p.Origin == origin && 
+                            p.Destination == destination && 
+                            p.Carrier == carrier && 
+                            p.Status == "Completed" && 
+                            p.ShippingDate >= cutoffDate)
                 .ToListAsync();
 
-            if (!relevantPackages.Any()) return (null, 0);
+            if (!relevantPackages.Any()) return;
 
+            //  Check for DeliveryDate being non-null before performing calculations.
             var totalDays = relevantPackages
-                .Sum(p => (p.DeliveryDate.HasValue ? (p.DeliveryDate.Value - p.ShippingDate).TotalDays : 0)); //  Check for DeliveryDate being non-null before performing calculations.
+                .Sum(p => (p.DeliveryDate.HasValue ? (p.DeliveryDate.Value - p.ShippingDate).TotalDays : 0)); 
 
             var averageDays = totalDays / relevantPackages.Count;
 
-            return (averageDays, relevantPackages.Count);
+            var statistics = await GetShippingStatisticsAsync(origin, destination, carrier);
+
+            if (statistics == null) // If this kind is not existing at all in the cache table
+            {
+                statistics = new ShippingStatistics
+                {
+                    Origin = origin,
+                    Destination = destination,
+                    Carrier = carrier,
+                    AverageShippingTime = averageDays,
+                    ShipmentCount = relevantPackages.Count,
+                    LastUpdateDate = DateTime.Now
+                };
+                await _dbContext.ShippingStatistics.AddAsync(statistics);
+            }
+            else // If exist, but outdated.
+            {
+                statistics.AverageShippingTime = averageDays;
+                statistics.ShipmentCount = relevantPackages.Count;
+                statistics.LastUpdateDate = DateTime.Now;
+            }
+
+            await _dbContext.SaveChangesAsync();
         }
 
 
+        // Calculates average shipping time
+        public async Task<(double? AverageDays, int Count)> GetAverageShippingTimeAsync(string origin, string destination, string carrier)
+        {
+           // First check the cached ShippingStatistics table
+            var statistics = await GetShippingStatisticsAsync(origin, destination, carrier); 
+
+            if (statistics != null && statistics.LastUpdateDate >= DateTime.Now.AddDays(-3))
+            {
+                return (statistics.AverageShippingTime, statistics.ShipmentCount);
+            }
+
+            // Update cached statistics table if not found or outdated
+            await UpdateShippingStatisticsAsync(origin, destination, carrier);
+
+            statistics = await GetShippingStatisticsAsync(origin, destination, carrier);
+            return statistics != null
+                ? (statistics.AverageShippingTime, statistics.ShipmentCount)
+                : (null, 0);
+        }
 
         // Fetch weather data real API
         public async Task<string?> CheckWeatherAsync(string destination)

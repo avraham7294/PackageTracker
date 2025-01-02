@@ -13,5 +13,8 @@ namespace PackageTracker.Data
         // Represents the PackageTrackings table in the database
         public DbSet<PackageTracking> PackageTrackings { get; set; }
 
+        // Include the ShippingStatistics table in the database
+        public DbSet<ShippingStatistics> ShippingStatistics { get; set; }
+
     }
 }
