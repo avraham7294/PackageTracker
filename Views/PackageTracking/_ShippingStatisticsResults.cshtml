@@ -1,0 +1,30 @@
+﻿@model List<PackageTracker.Models.ShippingStatistics>
+
+@if (Model != null && Model.Any())
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Carrier</th>
+                <th>Average Shipping Time (Days)</th>
+                <th>Shipment Count</th>
+                <th>Last Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var stat in Model)
+            {
+                <tr>
+                    <td>@stat.Carrier</td>
+                    <td>@stat.AverageShippingTime</td>
+                    <td>@stat.ShipmentCount</td>
+                    <td>@stat.LastUpdateDate.ToString("MMMM dd, yyyy")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No data available for the selected origin and destination.</p>
+}

@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "Shipping Statistics";
+}
+
+<h1>Shipping Statistics</h1>
+
+<form method="post" asp-action="FetchShippingStatistics" asp-controller="PackageTracking">
+    <label for="origin">Select Origin:</label>
+    <select id="origin" name="origin">
+        <option value="">--Select Origin--</option>
+        @foreach (var origin in ViewBag.Origins)
+        {
+            <option value="@origin">@origin</option>
+        }
+    </select>
+
+    <label for="destination">Select Destination:</label>
+    <select id="destination" name="destination">
+        <option value="">--Select Destination--</option>
+        @foreach (var destination in ViewBag.Destinations)
+        {
+            <option value="@destination">@destination</option>
+        }
+    </select>
+
+    <button type="submit">Show Shipping Statistics</button>
+</form>
+
+@if (ViewBag.ErrorMessage != null)
+{
+    <p style="color: red">@ViewBag.ErrorMessage</p>
+}
+
+<div id="statistics-results">
+    <!-- Partial view results will be loaded here -->
+</div>

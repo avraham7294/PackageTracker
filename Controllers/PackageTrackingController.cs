@@ -80,5 +80,36 @@ namespace PackageTracker.Controllers
 
             return View("Details", packageDetails);
         }
+
+        [HttpGet]
+        public IActionResult ShippingStatistics()
+        {
+            // Fetch distinct origins and destinations for the dropdowns
+            var origins = _dbContext.ShippingStatistics.Select(s => s.Origin).Distinct().ToList();
+            var destinations = _dbContext.ShippingStatistics.Select(s => s.Destination).Distinct().ToList();
+
+            // Pass origins and destinations to the ViewBag
+            ViewBag.Origins = origins;
+            ViewBag.Destinations = destinations;
+
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult FetchShippingStatistics(string origin, string destination)
+        {
+            if (string.IsNullOrEmpty(origin) || string.IsNullOrEmpty(destination))
+            {
+                ViewBag.ErrorMessage = "Both origin and destination must be selected.";
+                return RedirectToAction("ShippingStatistics");
+            }
+
+            // Query the database for matching records
+            var statistics = _dbContext.ShippingStatistics
+                .Where(s => s.Origin == origin && s.Destination == destination)
+                .ToList();
+
+            return PartialView("_ShippingStatisticsResults", statistics);
+        }
     }
 }
