@@ -175,7 +175,7 @@ namespace PackageTracker.Services
                 if (response?.Current?.TempC != null)
                 {
                     var temp = response.Current.TempC;
-                    if (temp < 10 || temp > 20) // Define extreme weather conditions
+                    if (temp < 15 || temp > 25) // Define extreme weather conditions
                     {
                         return "Due to extreme weather in the area, additional delays may occur.";
                     }

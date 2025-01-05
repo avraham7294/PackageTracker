@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PackageTracker.Data;
 using PackageTracker.Models;
+using PackageTracker.Services;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,10 +15,12 @@ namespace PackageTracker.Controllers
     public class PackageApiController : ControllerBase
     {
         private readonly PackageTrackerContext _dbContext;
+        private readonly PackageTrackingService _packageTrackingService;
 
-        public PackageApiController(PackageTrackerContext dbContext)
+        public PackageApiController(PackageTrackerContext dbContext, PackageTrackingService packageTrackingService)
         {
             _dbContext = dbContext;
+            _packageTrackingService = packageTrackingService;
         }
 
         /// <summary>
@@ -35,7 +38,17 @@ namespace PackageTracker.Controllers
                 return NotFound(new { Message = "Package not found." });
             }
 
-            return Ok(package);
+            // Fetch weather warning for the destination
+            string? weatherWarning = await _packageTrackingService.CheckWeatherAsync(package.Destination);
+
+            // Include weather warning in the response
+            var response = new
+            {
+                Package = package,
+                WeatherWarning = weatherWarning
+            };
+
+            return Ok(response);
         }
 
         /// <summary>
