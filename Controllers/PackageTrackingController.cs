@@ -81,6 +81,8 @@ namespace PackageTracker.Controllers
             return View("Details", packageDetails);
         }
 
+        // Shipping Statistics Page
+
         [HttpGet]
         public IActionResult ShippingStatistics()
         {
@@ -111,5 +113,7 @@ namespace PackageTracker.Controllers
 
             return PartialView("_ShippingStatisticsResults", statistics);
         }
+
+        //
     }
 }
